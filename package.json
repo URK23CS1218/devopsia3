@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "test": "jest --detectOpenHandles --forceExit",
+    "test": "jest --detectOpenHandles --forceExit --coverage",
     "lint": "eslint app.js"
   },
   "keywords": ["devsecops", "security", "pipeline"],

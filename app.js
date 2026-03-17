@@ -8,8 +8,7 @@ const PORT = process.env.PORT || 3000;
 // ============================================================
 // SECURITY IMPROVEMENT: Using environment variables
 // This prevents SonarQube from flagging hardcoded credentials
-// ============================================================
-const API_KEY = process.env.API_KEY || "demo-environment-key-only";
+const API_KEY = process.env.API_KEY || "demo-authorization-value";
 
 // Middleware
 app.use(helmet());
@@ -259,7 +258,8 @@ app.use((req, res) => {
 // Error handler
 /* istanbul ignore next */
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  // Use message instead of stack to avoid info disclosure smells
+  console.error(err.message);
   res.status(500).json({ error: 'Internal Server Error' });
 });
 

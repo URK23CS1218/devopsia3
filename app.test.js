@@ -69,21 +69,21 @@ describe('DevSecOps Web Application', () => {
       const res = await request(app)
         .get('/api/data')
         .set('Accept', 'application/json')
-        .set('Authorization', `Bearer demo-environment-key-only`);
+        .set('Authorization', `Bearer demo-authorization-value`);
       expect(res.statusCode).toBe(200);
       expect(res.body.data).toBeDefined();
     });
 
     it('should return 200 with valid API key in query param', async () => {
       const res = await request(app)
-        .get('/api/data?key=demo-environment-key-only')
+        .get('/api/data?key=demo-authorization-value')
         .set('Accept', 'application/json');
       expect(res.statusCode).toBe(200);
     });
 
     it('should return HTML when requested', async () => {
       const res = await request(app)
-        .get('/api/data?key=demo-environment-key-only')
+        .get('/api/data?key=demo-authorization-value')
         .set('Accept', 'text/html');
       expect(res.statusCode).toBe(200);
       expect(res.text).toContain('<!DOCTYPE html>');
