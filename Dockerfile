@@ -1,49 +1,25 @@
 # ============================================================
-# HARDENED Dockerfile — uses Alpine-based minimal image
-# This version follows security best practices:
-#   - Minimal base image (Alpine) with fewer CVEs
-#   - Multi-stage build to reduce final image size
-#   - Non-root user for running the application
-#   - No unnecessary packages or tools
+# VULNERABLE Dockerfile — uses full Node.js image
+# This version intentionally uses a large base image with
+# known CVEs for Trivy to detect during container scanning
 # ============================================================
 
-# Stage 1: Build dependencies
-FROM node:18-alpine AS builder
-
-WORKDIR /app
-
-COPY package*.json ./
-RUN npm ci --production && npm cache clean --force
-
-# Stage 2: Production image
-FROM node:18-alpine
+FROM node:18
 
 LABEL maintainer="URK23CS1218"
-LABEL description="DevSecOps Demo App — Hardened Version"
-
-# Create non-root user
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+LABEL description="DevSecOps Demo App — Vulnerable Version"
 
 WORKDIR /app
 
-# Copy only production dependencies from builder
-COPY --from=builder /app/node_modules ./node_modules
+# Copy package files and install dependencies
+COPY package*.json ./
+RUN npm install --production
 
 # Copy application source
 COPY app.js ./
-COPY package.json ./
-
-# Set ownership to non-root user
-RUN chown -R appuser:appgroup /app
-
-# Switch to non-root user
-USER appuser
 
 # Expose application port
 EXPOSE 3000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
-
+# Run as root (security issue — Trivy/best practices will flag this)
 CMD ["node", "app.js"]
