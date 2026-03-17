@@ -55,7 +55,7 @@ pipeline {
                 kubectl create namespace $KUBE_NAMESPACE || true
 
                 # Apply deployment imperative
-                kubectl create deployment devsecops-webapp --image=$DOCKER_IMAGE:latest -n $KUBE_NAMESPACE || kubectl set image deployment/devsecops-webapp webapp=$DOCKER_IMAGE:latest -n $KUBE_NAMESPACE
+                kubectl create deployment devsecops-webapp --image=$DOCKER_IMAGE:latest -n $KUBE_NAMESPACE || kubectl set image deployment/devsecops-webapp devsecops-webapp=$DOCKER_IMAGE:latest -n $KUBE_NAMESPACE
 
                 # Expose service imperative
                 kubectl expose deployment devsecops-webapp --type=NodePort --port=3000 -n $KUBE_NAMESPACE || true
