@@ -21,19 +21,97 @@ app.use(express.json());
 // Routes
 // ============================================================
 
-// Home page
+// Home page serving a nice HTML dashboard
 app.get('/', (req, res) => {
-  res.json({
-    application: 'DevSecOps Demo App',
-    version: '1.0.0',
-    status: 'running',
-    message: 'Welcome to the DevSecOps Pipeline Demo Application',
-    endpoints: {
-      health: '/health',
-      api_status: '/api/status',
-      api_data: '/api/data'
-    }
-  });
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>DevSecOps Demo Application</title>
+      <style>
+        :root {
+          --primary-color: #2563eb;
+          --bg-color: #f8fafc;
+          --card-bg: #ffffff;
+          --text-main: #1e293b;
+        }
+        body {
+          font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+          background-color: var(--bg-color);
+          color: var(--text-main);
+          margin: 0;
+          padding: 0;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          min-height: 100vh;
+        }
+        .container {
+          background-color: var(--card-bg);
+          border-radius: 12px;
+          box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+          padding: 40px;
+          max-width: 600px;
+          width: 90%;
+          text-align: center;
+        }
+        h1 {
+          color: var(--primary-color);
+          margin-bottom: 10px;
+          font-size: 2.2rem;
+        }
+        p {
+          color: #64748b;
+          font-size: 1.1rem;
+          line-height: 1.5;
+          margin-bottom: 30px;
+        }
+        .status-badge {
+          display: inline-block;
+          background-color: #dcfce7;
+          color: #166534;
+          padding: 6px 12px;
+          border-radius: 20px;
+          font-weight: bold;
+          font-size: 0.9rem;
+          margin-bottom: 20px;
+        }
+        .endpoints {
+          display: flex;
+          flex-direction: column;
+          gap: 15px;
+          margin-top: 30px;
+        }
+        .btn {
+          background-color: var(--primary-color);
+          color: white;
+          text-decoration: none;
+          padding: 12px 20px;
+          border-radius: 6px;
+          font-weight: 500;
+          transition: background-color 0.2s;
+        }
+        .btn:hover {
+          background-color: #1d4ed8;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="status-badge">🟢 Pipeline Status: Running</div>
+        <h1>DevSecOps Demo App</h1>
+        <p>Welcome to the live DevSecOps pipeline demo application. Hosted entirely through Jenkins and Kubernetes!</p>
+        
+        <div class="endpoints">
+          <a href="/health" class="btn">View App Health (/health)</a>
+          <a href="/api/status" class="btn">View API Status (/api/status)</a>
+        </div>
+      </div>
+    </body>
+    </html>
+  `);
 });
 
 // Health check endpoint (used by Kubernetes liveness/readiness probes)
