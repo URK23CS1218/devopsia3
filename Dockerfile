@@ -1,25 +1,40 @@
 # ============================================================
-# VULNERABLE Dockerfile — uses full Node.js image
-# This version intentionally uses a large base image with
-# known CVEs for Trivy to detect during container scanning
+# SECURE Dockerfile — minimal + updated + non-root
 # ============================================================
 
-FROM node:18
+FROM node:18-slim
 
 LABEL maintainer="URK23CS1218"
-LABEL description="DevSecOps Demo App — Vulnerable Version"
+LABEL description="Secure DevSecOps App"
+
+# Install only required packages and update system
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
+    ca-certificates curl && \
+    rm -rf /var/lib/apt/lists/*
+
+# Create non-root user
+RUN useradd -m appuser
 
 WORKDIR /app
 
-# Copy package files and install dependencies
+# Install dependencies
 COPY package*.json ./
-RUN npm install --production
+RUN npm ci --only=production
 
-# Copy application source
+# Copy app
 COPY app.js ./
 
-# Expose application port
+# Set ownership
+RUN chown -R appuser:appuser /app
+
+# Switch to non-root user
+USER appuser
+
 EXPOSE 3000
 
-# Run as root (security issue — Trivy/best practices will flag this)
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=3s \
+  CMD curl -f http://localhost:3000/health || exit 1
+
 CMD ["node", "app.js"]
