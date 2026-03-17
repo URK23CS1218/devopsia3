@@ -58,7 +58,8 @@ pipeline {
                 kubectl create deployment devsecops-webapp --image=$DOCKER_IMAGE:latest -n $KUBE_NAMESPACE || kubectl set image deployment/devsecops-webapp devsecops-webapp=$DOCKER_IMAGE:latest -n $KUBE_NAMESPACE
 
                 # Expose service imperative as LoadBalancer
-                kubectl expose deployment devsecops-webapp --type=LoadBalancer --port=3000 -n $KUBE_NAMESPACE || true
+                kubectl delete svc devsecops-webapp -n $KUBE_NAMESPACE || true
+                kubectl expose deployment devsecops-webapp --type=LoadBalancer --port=3000 -n $KUBE_NAMESPACE
 
                 # Restart deployment to pull latest image
                 kubectl rollout restart deployment devsecops-webapp -n $KUBE_NAMESPACE
