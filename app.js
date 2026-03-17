@@ -6,11 +6,10 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ============================================================
-// SECURITY ISSUE: Hardcoded API key (SonarQube will flag this)
-// In production, this should be stored in environment variables
-// or a secrets manager like Kubernetes Secrets
+// SECURITY IMPROVEMENT: Using environment variables
+// This prevents SonarQube from flagging hardcoded credentials
 // ============================================================
-const API_KEY = "sk-proj-R4nd0mH4rdc0d3dK3y123456789ABCDEF";  // sonar:S6418 - hardcoded credential
+const API_KEY = process.env.API_KEY || "demo-environment-key-only";
 
 // Middleware
 app.use(helmet());
