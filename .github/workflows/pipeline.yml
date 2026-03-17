@@ -45,7 +45,7 @@ jobs:
         with:
           args: >
             -Dsonar.projectKey=URK23CS1218_devopsia3
-            -Dsonar.organization=URK23CS1218
+            -Dsonar.organization=jeremiah
             -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }}
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
