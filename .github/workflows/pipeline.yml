@@ -40,24 +40,15 @@ jobs:
       - name: Run tests
         run: npm test
 
-      - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v5
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v6
         with:
           args: >
-            -Dsonar.projectKey=devsecops-webapp
-            -Dsonar.organization=makeashwarm
-            -Dsonar.projectName="DevSecOps Web Application"
-            -Dsonar.projectVersion=1.0.0
-            -Dsonar.sources=.
-            -Dsonar.inclusions=app.js
-            -Dsonar.exclusions=node_modules/**,coverage/**,k8s/**,terraform/**,*.test.js,*.md
-            -Dsonar.language=js
-            -Dsonar.sourceEncoding=UTF-8
-            -Dsonar.tests=.
-            -Dsonar.test.inclusions=*.test.js
+            -Dsonar.projectKey=devopsia3
+            -Dsonar.organization=jeremiah
+            -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }}
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
   # ──────────────────────────────────────────────────────────
   # Stage 2: BUILD — Docker build + push to Docker Hub
