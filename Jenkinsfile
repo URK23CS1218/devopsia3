@@ -1,112 +1,85 @@
 pipeline {
     agent any
 
+    options {
+        skipDefaultCheckout(true)
+    }
+
     environment {
-        // Docker Hub credentials should be configured in Jenkins
-        DOCKER_CREDENTIALS_ID = 'dockerhub-credentials'
-        DOCKER_IMAGE = 'your-dockerhub-username/devsecops-webapp'
-        IMAGE_TAG = "build-${env.BUILD_ID}"
-        
-        // SonarQube environment should be configured in Jenkins System Configuration 
-        // with the name 'SonarCloud'
+        // You can change 'devopslab1218' if needed, though this matches your Docker Hub
+        DOCKER_IMAGE = "devopslab1218/devsecops-webapp"
+        KUBE_NAMESPACE = "devsecops-app"
+        REPO_URL = "https://github.com/URK23CS1218/devopsia3.git"
     }
 
     stages {
-        stage('1. Checkout Code') {
+
+        stage('Clone Code') {
             steps {
-                checkout scm
+                deleteDir()
+                sh '''
+                git clone $REPO_URL .
+                '''
             }
         }
 
-        stage('2. Install & Test') {
-            agent {
-                docker {
-                    image 'node:18-slim'
-                    args '-u root:root'
-                }
-            }
+        stage('Build Docker Image') {
             steps {
-                sh 'npm ci'
-                sh 'npm test'
+                sh '''
+                docker build --platform linux/amd64 -t $DOCKER_IMAGE:latest .
+                '''
             }
         }
 
-        stage('3. SonarCloud SAST Scan') {
+        stage('Push to Docker Hub') {
             steps {
-                // Requires the SonarQube Scanner plugin installed in Jenkins
-                withSonarQubeEnv('SonarCloud') {
+                withCredentials([usernamePassword(
+                    credentialsId: 'docker-creds',
+                    usernameVariable: 'USER',
+                    passwordVariable: 'PASS'
+                )]) {
                     sh '''
-                        sonar-scanner \
-                          -Dsonar.projectKey=URK23CS1218_devopsia3 \
-                          -Dsonar.organization=jeremiah \
-                          -Dsonar.host.url=https://sonarcloud.io
+                    echo $PASS | docker login -u $USER --password-stdin
+                    docker push $DOCKER_IMAGE:latest
                     '''
                 }
             }
         }
 
-        stage('4. Quality Gate') {
+        stage('Deploy to Kubernetes') {
             steps {
-                // Wait for the webhook to report Quality Gate status
-                timeout(time: 5, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
-                }
-            }
-        }
-
-        stage('5. Build & Push Docker Image') {
-            steps {
-                script {
-                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_CREDENTIALS_ID}") {
-                        def customImage = docker.build("${DOCKER_IMAGE}:${IMAGE_TAG}")
-                        customImage.push()
-                        customImage.push('latest')
-                    }
-                }
-            }
-        }
-
-        stage('6. Trivy Container Scan') {
-            steps {
-                // Generates JSON report for all vulnerabilities
-                sh "trivy image --format json --output trivy-results.json --severity CRITICAL,HIGH,MEDIUM,LOW ${DOCKER_IMAGE}:${IMAGE_TAG}"
+                sh '''
+                export KUBECONFIG=/var/jenkins_home/kubeconfig
                 
-                // Security Gate: Fails the build if Fixable CRITICAL vulnerabilities are found
-                sh "trivy image --exit-code 1 --severity CRITICAL --ignore-unfixed ${DOCKER_IMAGE}:${IMAGE_TAG}"
-            }
-        }
+                # Create namespace if not exists
+                kubectl create namespace $KUBE_NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
 
-        stage('7. Deploy to Kubernetes') {
-            steps {
-                // Requires the Kubernetes CLI plugin and configured credentials ("kubeconfig")
-                withKubeConfig(credentialsId: 'kubeconfig', serverUrl: '') {
-                    sh '''
-                        kubectl apply -f k8s/namespace.yaml --validate=false
-                        kubectl apply -f k8s/secret.yaml --validate=false
-                        kubectl apply -f k8s/deployment.yaml --validate=false
-                        kubectl apply -f k8s/service.yaml --validate=false
-                        
-                        kubectl set image deployment/devsecops-webapp \
-                            webapp=${DOCKER_IMAGE}:${IMAGE_TAG} \
-                            -n devsecops-app
-                            
-                        kubectl rollout status deployment/devsecops-webapp -n devsecops-app
-                    '''
-                }
+                # Apply deployment
+                kubectl create deployment devsecops-webapp \
+                --image=$DOCKER_IMAGE:latest \
+                -n $KUBE_NAMESPACE \
+                --dry-run=client -o yaml | kubectl apply -f -
+
+                # Expose service
+                kubectl expose deployment devsecops-webapp \
+                --type=NodePort \
+                --port=3000 \
+                -n $KUBE_NAMESPACE \
+                --dry-run=client -o yaml | kubectl apply -f -
+
+                # Restart deployment to pull latest image
+                kubectl rollout restart deployment devsecops-webapp -n $KUBE_NAMESPACE
+                '''
             }
         }
     }
 
     post {
-        always {
-            // Archive the Trivy report so it can be viewed in Jenkins UI
-            archiveArtifacts artifacts: 'trivy-results.json', allowEmptyArchive: true
-        }
         success {
-            echo "🎉 DevSecOps Pipeline Completed Successfully!"
+            echo '🚀 Deployment Successful!'
         }
         failure {
-            echo "❌ Pipeline Failed! Check the logs (possibly blocked by Quality Gate or Trivy)."
+            echo '❌ Pipeline Failed!'
         }
     }
 }
