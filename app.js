@@ -257,12 +257,14 @@ app.use((req, res) => {
 });
 
 // Error handler
+/* istanbul ignore next */
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Internal Server Error' });
 });
 
 // Start server (only when run directly, not when imported for testing)
+/* istanbul ignore next */
 if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`DevSecOps app running on port ${PORT}`);

@@ -11,6 +11,12 @@ describe('DevSecOps Web Application', () => {
       expect(res.body.status).toBe('running');
       expect(res.body.endpoints).toBeDefined();
     });
+
+    it('should return HTML when requested', async () => {
+      const res = await request(app).get('/').set('Accept', 'text/html');
+      expect(res.statusCode).toBe(200);
+      expect(res.text).toContain('<!DOCTYPE html>');
+    });
   });
 
   describe('GET /health', () => {
@@ -21,6 +27,12 @@ describe('DevSecOps Web Application', () => {
       expect(res.body.timestamp).toBeDefined();
       expect(res.body.uptime).toBeDefined();
     });
+
+    it('should return HTML when requested', async () => {
+      const res = await request(app).get('/health').set('Accept', 'text/html');
+      expect(res.statusCode).toBe(200);
+      expect(res.text).toContain('System Health');
+    });
   });
 
   describe('GET /api/status', () => {
@@ -29,6 +41,12 @@ describe('DevSecOps Web Application', () => {
       expect(res.statusCode).toBe(200);
       expect(res.body.api).toBe('operational');
       expect(res.body.version).toBe('1.0.0');
+    });
+
+    it('should return HTML when requested', async () => {
+      const res = await request(app).get('/api/status').set('Accept', 'text/html');
+      expect(res.statusCode).toBe(200);
+      expect(res.text).toContain('API Status');
     });
   });
 
@@ -45,6 +63,31 @@ describe('DevSecOps Web Application', () => {
         .set('Accept', 'application/json')
         .set('Authorization', 'Bearer wrong-key');
       expect(res.statusCode).toBe(401);
+    });
+
+    it('should return 200 with valid API key in header', async () => {
+      const res = await request(app)
+        .get('/api/data')
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer demo-environment-key-only`);
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data).toBeDefined();
+    });
+
+    it('should return 200 with valid API key in query param', async () => {
+      const res = await request(app)
+        .get('/api/data?key=demo-environment-key-only')
+        .set('Accept', 'application/json');
+      expect(res.statusCode).toBe(200);
+    });
+
+    it('should return HTML when requested', async () => {
+      const res = await request(app)
+        .get('/api/data?key=demo-environment-key-only')
+        .set('Accept', 'text/html');
+      expect(res.statusCode).toBe(200);
+      expect(res.text).toContain('<!DOCTYPE html>');
+      expect(res.text).toContain('Secured Data Payload');
     });
   });
 
