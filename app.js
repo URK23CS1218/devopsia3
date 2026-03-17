@@ -135,20 +135,37 @@ const renderPage = (title, content, badge = null) => `
 // Routes
 // ============================================================
 
-// Home page serving a nice HTML dashboard
+// Home page serving a nice HTML dashboard (with JSON fallback for tests)
 app.get('/', (req, res) => {
-  res.send(renderPage(
-    'DevSecOps Demo App',
-    `
-      <p>Welcome to the live DevSecOps pipeline demo application. Hosted entirely through Jenkins and Kubernetes!</p>
-      <div class="endpoints">
-        <a href="/health" class="btn">View App Health (/health)</a>
-        <a href="/api/status" class="btn">View API Status (/api/status)</a>
-        <a href="/api/data" class="btn">View Secure Data (/api/data)</a>
-      </div>
-    `,
-    { text: '🟢 Pipeline Status: Running' }
-  ));
+  const jsonResponse = {
+    application: 'DevSecOps Demo App',
+    version: '1.0.0',
+    status: 'running',
+    message: 'Welcome to the DevSecOps Pipeline Demo Application',
+    endpoints: {
+      health: '/health',
+      api_status: '/api/status',
+      api_data: '/api/data'
+    }
+  };
+
+  if (req.accepts('html') && req.headers.accept.includes('html')) {
+    res.send(renderPage(
+      'DevSecOps Demo App',
+      `
+        <p>Welcome to the live DevSecOps pipeline demo application. Hosted entirely through Jenkins and Kubernetes!</p>
+        <div class="endpoints">
+          <a href="/health" class="btn">View App Health (/health)</a>
+          <a href="/api/status" class="btn">View API Status (/api/status)</a>
+          <a href="/api/data" class="btn">View Secure Data (/api/data)</a>
+        </div>
+      `,
+      { text: '🟢 Pipeline Status: Running' }
+    ));
+  } else {
+    // Return original JSON for API consumers and unit tests
+    res.json(jsonResponse);
+  }
 });
 
 // Health check endpoint
