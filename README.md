@@ -3,11 +3,12 @@
 ---
 
 ## 🚀 Final Production-Ready Status
-The system is currently fully operational in a **Production-Ready** state:
-- **🐳 Docker Host**: Secure Node.js application running at [http://localhost:3000](http://localhost:3000)
-- **🧠 AI Remediator**: Python AI engine active and linked to OpenRouter.
-- **🔗 Jenkins CI/CD**: Resilient pipeline with integrated clickable deployment links.
-- **🛡️ Security**: Hardened Alpine container running as non-root `appuser`.
+The system is currently fully operational and **Viva-Ready**:
+- **🐳 Docker Hub**: [devopslab1218/devopsia3](https://hub.docker.com/r/devopslab1218/devopsia3)
+- **🐙 GitHub Repo**: [URK23CS1218/devopsia3](https://github.com/URK23CS1218/devopsia3)
+- **🔗 Local Access**: [http://localhost:30007](http://localhost:30007)
+- **🧠 AI Remediator**: Active simulation engine with 83.2% time reduction.
+- **🛡️ Security**: Hardened Alpine container with non-root user and read-only filesystem.
 
 ---
 
@@ -134,13 +135,15 @@ python ai/ai_playbook_generator.py
 → Type: **"Install nginx and open port 80"**
 → Watch AI generate a complete, valid Ansible playbook in seconds
 
-### Step 4: AI Auto-Remediation Simulation
-
-```bash
-python ai/test_simulation.py
-```
-→ Watch 5 infrastructure alerts diagnosed by AI in real-time
-→ See the formatted results table with urgency levels and auto-fix decisions
+### Step 4: 🚀 GitHub Actions Pipeline (7 Critical Stages)
+The automated CI/CD pipeline is organized into **7 security-first stages**:
+1.  **🔍 SonarCloud**: Static Code Analysis (SAST).
+2.  **🐳 Docker Build**: Multi-stage hardened build.
+3.  **🛡️ Trivy Security**: Static Vulnerability Scan (CVE).
+4.  **🚫 Security Gate**: Automatic blocking of critical vulnerabilities.
+5.  **🏗️ Terraform**: Infrastructure provisioning (Namespace/Secrets).
+6.  **🚀 Kubernetes**: Dynamic deployment with image tag replacement.
+7.  **🔐 Ansible**: Post-deployment server hardening (UFW/SSH).
 
 ### Step 5: Research Metrics & Final Results
 
