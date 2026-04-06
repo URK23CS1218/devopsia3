@@ -1,42 +1,45 @@
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# FILE 9: terraform/variables.tf
-# Phase 4 — Terraform Variables
-# Defines all configurable parameters for the infrastructure
+# FILE 9: terraform/variables.tf (FINAL)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-# ── Kubernetes Context ──────────────────────────────────────
+# ── Kubernetes Config Path ────────────────────────────────
+variable "kubeconfig_path" {
+  description = "Path to kubeconfig file"
+  type        = string
+  default     = "~/.kube/config"
+}
+
+# ── Kubernetes Context ────────────────────────────────────
 variable "kube_context" {
-  description = "Kubernetes context to use from kubeconfig"
+  description = "Kubernetes context to use"
   type        = string
   default     = "docker-desktop"
 }
 
-# ── Namespace ───────────────────────────────────────────────
+# ── Namespace ─────────────────────────────────────────────
 variable "namespace" {
-  description = "Kubernetes namespace for the application"
+  description = "Kubernetes namespace"
   type        = string
   default     = "myapp-prod"
 }
 
-# ── Environment ─────────────────────────────────────────────
+# ── Environment ───────────────────────────────────────────
 variable "environment" {
-  description = "Deployment environment label"
+  description = "Deployment environment"
   type        = string
   default     = "production"
 }
 
-# ── Sensitive: Database URL ─────────────────────────────────
+# ── Sensitive: Database URL ───────────────────────────────
 variable "db_url" {
   description = "Database connection string"
   type        = string
   sensitive   = true
-  default     = ""
 }
 
-# ── Sensitive: API Key ──────────────────────────────────────
+# ── Sensitive: API Key ────────────────────────────────────
 variable "api_key" {
   description = "Application API key"
   type        = string
   sensitive   = true
-  default     = ""
 }

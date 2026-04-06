@@ -19,7 +19,7 @@ terraform {
 # ── Kubernetes Provider ─────────────────────────────────────
 # Uses the kubeconfig context specified in variables
 provider "kubernetes" {
-  config_path    = "~/.kube/config"
+  config_path    = pathexpand(var.kubeconfig_path)
   config_context = var.kube_context
 }
 
@@ -67,7 +67,7 @@ resource "kubernetes_secret" "app_secrets" {
   type = "Opaque"
 
   data = {
-    DATABASE_URL = var.db_url
-    API_KEY      = var.api_key
+    DATABASE_URL = base64encode(var.db_url)
+    API_KEY      = base64encode(var.api_key)
   }
 }
